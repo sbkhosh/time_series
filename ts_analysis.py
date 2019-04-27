@@ -139,18 +139,14 @@ def ts_analysis(df,ticker,header,lag):
     select_cols = [ col for col in df.columns if str(ticker) in col ]
     select_res = [ df[el] for el in select_cols ]
     select_df = merge_dfs(select_res)
-    data = select_df[str(header) + " - " + str(ticker)].\
-           interpolate(method ='linear', limit_direction ='forward')
-    data = data.fillna(0)
+    data = select_df[str(header) + " - " + str(ticker)].dropna()
     tsplot(data,lags=lag,figsize=(10,8),style='ggplot',tick=ticker)
     plt.show()
     
 def scatter_analysis(df,tickers,header):
     select_cols = list(map(lambda x: str(header) + ' - ' + x, tickers))
-    select_df = df[df.columns.intersection(select_cols)].\
-                interpolate(method ='linear', limit_direction ='forward')
-    select_df = select_df.fillna(0)
-    pd.plotting.scatter_matrix(select_df, diagonal='hist', alpha=0.1,figsize=(12,12))
+    select_df = df[df.columns.intersection(select_cols)].dropna()
+    pd.plotting.scatter_matrix(select_df, diagonal='kde', alpha=0.1,figsize=(12,12))
     plt.show()
         
 if __name__ == '__main__':
@@ -167,4 +163,4 @@ if __name__ == '__main__':
     df_all = log_ret_all(dfs_ret,tickers_eff)
 
     ts_analysis(df_all,"AAPL","Adj. Close",30)
-    scatter_analysis(df_all,["AAPL","AMZN","GOOGL","GOOG"],"Adj. Close")
+    scatter_analysis(df_all,["AAPL","AMZN"],"Adj. Close")
