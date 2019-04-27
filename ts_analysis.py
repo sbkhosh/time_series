@@ -56,7 +56,7 @@ def get_tickers(tickers):
         ticker = str(ticker)
         try: 
             print(ticker)
-            quandl.ApiConfig.api_key = "M3S6cLgQ3b_czSDmKJxD"
+            quandl.ApiConfig.api_key = ""
             df = quandl.get("WIKI/" + ticker, start_date = "2015-12-31", end_date = "2019-03-31")
             write_to(df,str(ticker),"csv")
         except ValueError:
