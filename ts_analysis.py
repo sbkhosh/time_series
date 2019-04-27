@@ -120,7 +120,8 @@ def get_ret_values(df):
     df["hl_pct"] = (df['Adj. High'] - df['Adj. Low']) / df['Adj. Close'] * 100.0
     df["return"] = df["Adj. Close"]/df["Adj. Close"].shift(1)
     df["log-return"] = np.log(df["Adj. Close"]/df["Adj. Close"].shift(1))
-    df["volatility"] = df["log-return"].rolling(window=wnd["wnd_mean4"],center=False).std()
+    df["volatility"] = df["log-return"].rolling(window=wnd["wnd_mean4"],center=False).std() * \
+                                                        np.sqrt(wnd["wnd_mean4"])
     df["roll-mean" + str(wnd["wnd_mean4"])] = df["Adj. Close"].rolling \
                                             (window=wnd["wnd_mean4"],center=False).mean()
     df["roll-mean" + str(wnd["wnd_mean3"])] = df["Adj. Close"].rolling\
@@ -144,7 +145,14 @@ def ts_analysis(df,ticker,header,lag):
     tsplot(data,lags=lag,figsize=(10,8),style='ggplot',tick=ticker)
     plt.show()
     
-    
+def scatter_analysis(df,tickers,header):
+    select_cols = list(map(lambda x: str(header) + ' - ' + x, tickers))
+    select_df = df[df.columns.intersection(select_cols)].\
+                interpolate(method ='linear', limit_direction ='forward')
+    select_df = select_df.fillna(0)
+    pd.plotting.scatter_matrix(select_df, diagonal='hist', alpha=0.1,figsize=(12,12))
+    plt.show()
+        
 if __name__ == '__main__':
     tickers = save_sp500_tickers()
     # get_tickers(tickers)
@@ -158,4 +166,5 @@ if __name__ == '__main__':
     dfs_ret = [ get_ret_values(dfs[el]) for el in range(len(dfs)) ]   
     df_all = log_ret_all(dfs_ret,tickers_eff)
 
-    ts_analysis(df_all,"AAPL","log-return",30)
+    ts_analysis(df_all,"AAPL","Adj. Close",30)
+    scatter_analysis(df_all,["AAPL","AMZN","GOOGL","GOOG"],"Adj. Close")
